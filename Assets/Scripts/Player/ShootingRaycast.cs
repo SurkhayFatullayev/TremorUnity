@@ -89,7 +89,7 @@ public class Shooter
             Health enemy = hit.collider.GetComponent<Health>();
             if (enemy != null)
             {
-                enemy.TakeDamage(baseDamage);
+                enemy.TakeDamage(Mathf.RoundToInt(baseDamage)); // ✅ Converts float to int before passing
             }
 
             // Spawn hit effect

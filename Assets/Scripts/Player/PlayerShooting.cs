@@ -8,6 +8,21 @@ public class Shooting : MonoBehaviour
     public float fireRate = 0.5f;
     private float nextFireTime = 0f;
 
+    [Header("Audio Settings")]
+    public AudioClip shootSound; // Sound effect for shooting
+    public float shootVolume = 1.0f;
+    private AudioSource audioSource;
+
+    
+        void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
+
     void Update()
     {
         if (Input.GetButtonDown("Fire1") && Time.time >= nextFireTime)
@@ -27,6 +42,21 @@ public class Shooting : MonoBehaviour
             rb.AddForce(firePoint.forward * projectileSpeed, ForceMode.Impulse);
         }
 
+        // Play shooting sound
+        PlayShootSound();
+
         Destroy(projectile, 3f);
+    }
+
+    void PlayShootSound()
+    {
+        if (shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound, shootVolume);
+        }
+        else
+        {
+            Debug.LogWarning("No shooting sound assigned!");
+        }
     }
 }
