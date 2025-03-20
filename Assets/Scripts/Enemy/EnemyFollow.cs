@@ -145,10 +145,11 @@ private void AttackPlayer()
         Destroy(rb.gameObject, 2f);
 
             // 🔊 Play shooting sound when projectile is fired
-            if (audioSource != null && shootingSound != null)
+            if (shootingSound != null)
             {
-                audioSource.PlayOneShot(shootingSound);
+                AudioSource.PlayClipAtPoint(shootingSound, transform.position);
             }
+
 
         alreadyAttacked = true;
         Invoke(nameof(ResetAttack), timeBetweenAttacks);
