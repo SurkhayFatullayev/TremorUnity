@@ -38,7 +38,9 @@ public class FirstPersonController : MonoBehaviour
     private float yaw = 0.0f;
     private float pitch = 0.0f;
     private Image crosshairObject;
-
+    private float originalHeight;
+    private Vector3 originalCenter;
+    private CapsuleCollider capsuleCollider;
     #region Camera Zoom Variables
 
     public bool enableZoom = true;
@@ -137,6 +139,16 @@ public class FirstPersonController : MonoBehaviour
 
         crosshairObject = GetComponentInChildren<Image>();
 
+        capsuleCollider = GetComponent<CapsuleCollider>();
+        if (capsuleCollider != null)
+        {
+            originalHeight = capsuleCollider.height;
+            originalCenter = capsuleCollider.center;
+        }
+        else
+        {
+            Debug.LogError("CapsuleCollider not found on " + gameObject.name);
+        }
         // Set internal variables
         playerCamera.fieldOfView = fov;
         originalScale = transform.localScale;
@@ -151,6 +163,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        
         if(lockCursor)
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -188,6 +201,7 @@ public class FirstPersonController : MonoBehaviour
             {
                 sprintBarCG.alpha = 0;
             }
+
         }
         else
         {
@@ -227,7 +241,7 @@ public class FirstPersonController : MonoBehaviour
         }
 
         #region Camera Zoom
-
+        
         if (enableZoom)
         {
             // Changes isZoomed when key is pressed
@@ -477,22 +491,28 @@ public class FirstPersonController : MonoBehaviour
 
     private void Crouch()
     {
-        // Stands player up to full height
-        // Brings walkSpeed back up to original speed
-        if(isCrouched)
-        {
-            transform.localScale = new Vector3(originalScale.x, originalScale.y, originalScale.z);
-            walkSpeed /= speedReduction;
+        if (capsuleCollider == null) return; // Safety check
 
+        if (isCrouched)
+        {
+            capsuleCollider.height = originalHeight;
+            capsuleCollider.center = originalCenter;
+            playerCamera.transform.localPosition = new Vector3(
+                playerCamera.transform.localPosition.x, 
+                originalCenter.y, 
+                playerCamera.transform.localPosition.z
+            );
             isCrouched = false;
         }
-        // Crouches player down to set height
-        // Reduces walkSpeed
         else
         {
-            transform.localScale = new Vector3(originalScale.x, crouchHeight, originalScale.z);
-            walkSpeed *= speedReduction;
-
+            capsuleCollider.height = crouchHeight;  // Example crouch height
+            capsuleCollider.center = new Vector3(originalCenter.x, crouchHeight / 2 - originalHeight / 2, originalCenter.z);
+            playerCamera.transform.localPosition = new Vector3(
+                playerCamera.transform.localPosition.x, 
+                capsuleCollider.center.y, 
+                playerCamera.transform.localPosition.z
+            );
             isCrouched = true;
         }
     }
